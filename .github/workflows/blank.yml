@@ -1,13 +1,13 @@
-name: Flutter Build
+name: Flutter iOS Build
 
 on:
   push:
     branches:
-      - main  # This runs the build whenever you push to the 'main' branch
+      - main  # Trigger on push to the 'main' branch
 
 jobs:
   build:
-    runs-on: macos-latest  # macOS for iOS builds
+    runs-on: macos-latest  # macOS runner for iOS build
 
     steps:
     - name: Checkout repository
@@ -16,29 +16,24 @@ jobs:
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: 'stable'  # You can specify a version like '3.13.0'
+        flutter-version: 'stable'  # Use the stable Flutter version
 
     - name: Install dependencies
-      run: flutter pub get
+      run: flutter pub get  # Get dependencies
 
-    - name: Build APK
-      run: flutter build apk --release
+    - name: Set up iOS dependencies
+      run: sudo gem install cocoapods  # Install CocoaPods if needed
 
-    - name: Build iOS
+    - name: Build iOS app
+      run: flutter build ios --release  # Build the iOS app for release
+
+    - name: Create iOS Artifact
       run: |
-        flutter build ios --release
         cd build/ios/iphoneos
-        zip -r FlutterApp.zip Runner.app  # Create a zip file of the iOS app
+        zip -r FlutterApp.zip Runner.app  # Create a .zip of the iOS app
 
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: app-release.apk
-        path: build/app/outputs/flutter-apk/app-release.apk
-    
     - name: Upload iOS Artifact
       uses: actions/upload-artifact@v2
       with:
         name: FlutterApp.zip
-        path: build/ios/iphoneos/FlutterApp.zip
-
+        path: build/ios/iphoneos/FlutterApp.zip  # Upload the iOS build artifact
