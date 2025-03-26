@@ -1,0 +1,43 @@
+name: Flutter Build
+
+on:
+  push:
+    branches:
+      - main  # This runs the build whenever you push to the 'main' branch
+
+jobs:
+  build:
+    runs-on: macos-latest  # macOS for iOS builds
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3  # Clones your repo
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: 'stable'  # You can specify a version like '3.13.0'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build APK
+      run: flutter build apk --release
+
+    - name: Build iOS
+      run: |
+        flutter build ios --release
+        cd build/ios/iphoneos
+        zip -r FlutterApp.zip Runner.app  # Create a zip file of the iOS app
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release.apk
+        path: build/app/outputs/flutter-apk/app-release.apk
+
+    - name: Upload iOS Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: FlutterApp.zip
+        path: build/ios/iphoneos/FlutterApp.zip
